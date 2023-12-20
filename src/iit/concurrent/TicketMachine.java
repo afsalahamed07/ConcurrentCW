@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 
 public class TicketMachine implements ServiceTicketMachine, Printer {
+    private static TicketMachine TICKET_MACHINE;
     private int currentTonerLevel;
     private int currentPaperLevel;
     private int ticketsDispensed; // keeps track of tickets dispensed
@@ -26,10 +27,24 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
     private static final Logger LOGGER = Logger.getLogger(TicketMachine.class.getName());
 
 
-    public TicketMachine(int currentTonerLevel, int currentPaperLevel) {
+    private TicketMachine(int currentTonerLevel, int currentPaperLevel) {
         this.currentTonerLevel = currentTonerLevel;
         this.currentPaperLevel = currentPaperLevel;
         this.ticketsDispensed = 0;
+    }
+
+    public static TicketMachine getTicketMachine() {
+        // Making the ticket machine singleton
+        // to make sure there's only one machine in the system
+        if (TICKET_MACHINE == null) TICKET_MACHINE = new TicketMachine(Constants.FULL_TONER_LEVEL, Constants.FULL_PAPER_TRAY);
+        return TICKET_MACHINE;
+    }
+
+    public static TicketMachine getHalfFullTicketMachine() {
+        // Making the ticket machine singleton
+        // to make sure there's only one machine in the system
+        if (TICKET_MACHINE == null) TICKET_MACHINE = new TicketMachine(50, 50);
+        return TICKET_MACHINE;
     }
 
     @Override
@@ -50,7 +65,10 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             LOGGER.log(Level.INFO, "current machine state {0}", this);
             return 1;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, () -> Thread.currentThread().getName() + "Thread interrupted" + e);
+            // Re-interrupt the thread to preserve the interrupted status
+            Thread.currentThread().interrupt();
+            // Terminating the thread with poison pill
             return Constants.POISON_PILL;
         } finally {
             reentrantLock.unlock();
@@ -76,7 +94,10 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             LOGGER.log(Level.INFO, "current machine state {0}", this);
             return 1;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, () -> Thread.currentThread().getName() + "Thread interrupted" + e);
+            // Re-interrupt the thread to preserve the interrupted status
+            Thread.currentThread().interrupt();
+            // Terminating the thread with poison pill
             return Constants.POISON_PILL;
         } finally {
             reentrantLock.unlock();
@@ -114,7 +135,11 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                         return Constants.POISON_PILL;
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, () -> Thread.currentThread().getName() + "Thread interrupted" + e);
+                    // Re-interrupt the thread to preserve the interrupted status
+                    Thread.currentThread().interrupt();
+                    // Terminating the thread with poison pill
+                    return Constants.POISON_PILL;
                 }
             }
 
@@ -139,7 +164,8 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
     }
 
     private Ticket generateTicket(Passenger passenger) {
-        return new Ticket(passenger, ticketsDispensed);
+        int ticketNumber =  Math.floorDiv(passenger.getFrom().getValue(), passenger.getTo().getValue());
+        return new Ticket(passenger, ticketsDispensed, ticketNumber);
     }
 
     @Override

@@ -2,7 +2,13 @@ package iit.concurrent;
 
 public class TicketPrintingSystem {
     public static void main(String[] args) {
-        TicketMachine ticketMachine = new TicketMachine(50, 50);
+        // lets creat a que to have tasks to print tickets (msg que)
+        // should hold tickets
+        // then assign these to the passenger threads
+
+//        TicketMachine ticketMachine = TicketMachine.getTicketMachine();
+        TicketMachine ticketMachine = TicketMachine.getHalfFullTicketMachine();
+
 
         ThreadGroup passagnersThreadGroup = new ThreadGroup("Passengers");
         ThreadGroup technecionThreadGroup = new ThreadGroup("Technicians");
@@ -11,7 +17,7 @@ public class TicketPrintingSystem {
         Technician[] technicians = new Technician[2];
 
         for (int i = 0; i < passengers.length; i++) {
-            passengers[i] = new Passenger("passenger_" + (i + 1), ticketMachine);
+            passengers[i] = new Passenger("passenger_" + (i + 1), Destinations.CITY4, Destinations.CITY1, ticketMachine);
         }
 
         technicians[0] = new TicketPaperTechnician("paper_technician", ticketMachine);
