@@ -6,7 +6,7 @@ public class Passenger implements Runnable {
     private Ticket ticket;
 
     // the initialisation of the ticket machine is not done by the passenger
-    private final TicketMachine ticketMachine;
+    private final Printer ticketMachine;
 
     private Destinations from;
     private Destinations to;
@@ -31,7 +31,7 @@ public class Passenger implements Runnable {
         printTicket(ticketMachine);
     }
 
-    public void printTicket(TicketMachine ticketMachine) {
+    public void printTicket(Printer ticketMachine) {
         ticketMachine.registerPassenger();
 
         if (ticketMachine.printTicket(this) == Constants.POISON_PILL) {
